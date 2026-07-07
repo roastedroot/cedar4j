@@ -1,0 +1,9 @@
+.idea/
+*.iml
+.DS_Store
+
+.cache/
+.claude
+target
+
+wasm-build/wasi-sdk
