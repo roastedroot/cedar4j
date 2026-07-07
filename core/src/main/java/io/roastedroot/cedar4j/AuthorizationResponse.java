@@ -74,8 +74,12 @@ public final class AuthorizationResponse {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AuthorizationResponse)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AuthorizationResponse)) {
+            return false;
+        }
         AuthorizationResponse that = (AuthorizationResponse) o;
         return success == that.success
                 && decision == that.decision

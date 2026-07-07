@@ -377,7 +377,7 @@ public class CedarExtensionTest {
                                     if (!response.isAllowed()) {
                                         allPassed.set(false);
                                     }
-                                } catch (Exception e) {
+                                } catch (InterruptedException | RuntimeException e) {
                                     allPassed.set(false);
                                 } finally {
                                     latch.countDown();

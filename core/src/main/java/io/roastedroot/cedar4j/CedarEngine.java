@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
-public class CedarEngine implements AutoCloseable {
+public final class CedarEngine implements AutoCloseable {
     public static final ObjectMapper DEFAULT_MAPPER = new ObjectMapper();
 
     private final CedarWasm wasm;

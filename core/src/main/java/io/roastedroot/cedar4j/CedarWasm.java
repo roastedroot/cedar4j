@@ -1,5 +1,6 @@
 package io.roastedroot.cedar4j;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -10,7 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import run.endive.runtime.Instance;
 import run.endive.runtime.Memory;
 
-class CedarWasm {
+final class CedarWasm {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final CedarExports_ModuleExports exports;
@@ -87,13 +88,13 @@ class CedarWasm {
             JsonNode args = MAPPER.readTree(argsJson);
             JsonNode result = extFn.invoke(args);
             return writeResultToWasm(MAPPER.writeValueAsString(result));
-        } catch (Exception e) {
+        } catch (JsonProcessingException | RuntimeException e) {
             String msg = e.getMessage() != null ? e.getMessage() : "extension error";
             try {
                 ObjectNode errorNode = MAPPER.createObjectNode();
                 errorNode.put("error", msg);
                 return writeResultToWasm(MAPPER.writeValueAsString(errorNode));
-            } catch (Exception ex) {
+            } catch (JsonProcessingException ex) {
                 return writeResultToWasm("{\"error\":\"extension error\"}");
             }
         }

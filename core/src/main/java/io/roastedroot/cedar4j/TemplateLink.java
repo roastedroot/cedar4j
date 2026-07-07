@@ -46,8 +46,12 @@ public final class TemplateLink {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof TemplateLink)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof TemplateLink)) {
+            return false;
+        }
         TemplateLink that = (TemplateLink) o;
         return Objects.equals(templateId, that.templateId)
                 && Objects.equals(resultPolicyId, that.resultPolicyId)
@@ -97,8 +101,12 @@ public final class TemplateLink {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof LinkValue)) return false;
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof LinkValue)) {
+                return false;
+            }
             LinkValue that = (LinkValue) o;
             return Objects.equals(slot, that.slot) && Objects.equals(value, that.value);
         }

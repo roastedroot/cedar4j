@@ -113,8 +113,12 @@ public final class PartialAuthorizationResponse {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PartialAuthorizationResponse)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PartialAuthorizationResponse)) {
+            return false;
+        }
         PartialAuthorizationResponse that = (PartialAuthorizationResponse) o;
         return success == that.success
                 && decision == that.decision

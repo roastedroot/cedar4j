@@ -1,6 +1,6 @@
 package io.roastedroot.cedar4j;
 
-public class CedarRawEngine {
+public final class CedarRawEngine {
     private final CedarWasm wasm;
 
     CedarRawEngine(CedarWasm wasm) {

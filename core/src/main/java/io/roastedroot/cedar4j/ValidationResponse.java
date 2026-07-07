@@ -64,8 +64,12 @@ public final class ValidationResponse {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ValidationResponse)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ValidationResponse)) {
+            return false;
+        }
         ValidationResponse that = (ValidationResponse) o;
         return success == that.success
                 && Objects.equals(validationErrors, that.validationErrors)

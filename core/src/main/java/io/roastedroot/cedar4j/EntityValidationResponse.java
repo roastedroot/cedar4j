@@ -31,8 +31,12 @@ public final class EntityValidationResponse {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof EntityValidationResponse)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof EntityValidationResponse)) {
+            return false;
+        }
         EntityValidationResponse that = (EntityValidationResponse) o;
         return success == that.success && Objects.equals(errors, that.errors);
     }

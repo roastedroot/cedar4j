@@ -53,8 +53,12 @@ public final class PartialAuthorizationRequest {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PartialAuthorizationRequest)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PartialAuthorizationRequest)) {
+            return false;
+        }
         PartialAuthorizationRequest that = (PartialAuthorizationRequest) o;
         return Objects.equals(principal, that.principal)
                 && Objects.equals(action, that.action)

@@ -20,8 +20,12 @@ public final class DetailedError {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DetailedError)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DetailedError)) {
+            return false;
+        }
         DetailedError that = (DetailedError) o;
         return Objects.equals(message, that.message);
     }

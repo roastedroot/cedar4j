@@ -85,8 +85,12 @@ public final class PolicySet {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PolicySet)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof PolicySet)) {
+            return false;
+        }
         PolicySet that = (PolicySet) o;
         return Objects.equals(policies, that.policies)
                 && Objects.equals(templates, that.templates)

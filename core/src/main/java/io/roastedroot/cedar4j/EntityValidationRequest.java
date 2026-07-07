@@ -1,6 +1,7 @@
 package io.roastedroot.cedar4j;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Objects;
 import java.util.Set;
 
@@ -52,7 +53,7 @@ public final class EntityValidationRequest {
             } else {
                 try {
                     schemaValue = CedarEngine.DEFAULT_MAPPER.readTree(schema.text());
-                } catch (Exception e) {
+                } catch (JsonProcessingException e) {
                     throw new CedarException("Invalid JSON schema", e);
                 }
             }
