@@ -26,15 +26,21 @@
   </dependencyManagement>
 
   <dependencies>
-    <dependency>
-      <groupId>run.endive</groupId>
-      <artifactId>wasi</artifactId>
-    </dependency>
 
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>run.endive</groupId>
+      <artifactId>wasi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+      <version>1.27.1</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -48,54 +54,10 @@
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-compress</artifactId>
-      <version>1.27.1</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>run.endive</groupId>
-        <artifactId>endive-compiler-maven-plugin</artifactId>
-        <version>${endive.version}</version>
-        <executions>
-          <execution>
-            <id>compile-cedar</id>
-            <goals>
-              <goal>compile</goal>
-            </goals>
-            <configuration>
-              <name>io.roastedroot.cedar4j.CedarModule</name>
-              <wasmFile>${project.basedir}/../wasm-build/wasm/cedar.wasm</wasmFile>
-              <interpreterFallback>WARN</interpreterFallback>
-              <moduleInterface>io.roastedroot.cedar4j.CedarExports</moduleInterface>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>${build-helper-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>add-endive-generated-sources</id>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <phase>generate-sources</phase>
-            <configuration>
-              <sources>
-                <source>${project.build.directory}/generated-sources/endive-compiler</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>com.googlecode.maven-download-plugin</groupId>
         <artifactId>download-maven-plugin</artifactId>
@@ -120,6 +82,44 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${surefire-plugin.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>${build-helper-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>add-endive-generated-sources</id>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <phase>generate-sources</phase>
+            <configuration>
+              <sources>
+                <source>${project.build.directory}/generated-sources/endive-compiler</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>run.endive</groupId>
+        <artifactId>endive-compiler-maven-plugin</artifactId>
+        <version>${endive.version}</version>
+        <executions>
+          <execution>
+            <id>compile-cedar</id>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+            <configuration>
+              <name>io.roastedroot.cedar4j.CedarModule</name>
+              <wasmFile>${project.basedir}/../wasm-build/wasm/cedar.wasm</wasmFile>
+              <interpreterFallback>WARN</interpreterFallback>
+              <moduleInterface>io.roastedroot.cedar4j.CedarExports</moduleInterface>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,9 +39,7 @@ public class CedarEngine implements AutoCloseable {
     }
 
     public AuthorizationResponse isAuthorized(
-            AuthorizationRequest request,
-            PolicySet policySet,
-            Set<Entity> entities) {
+            AuthorizationRequest request, PolicySet policySet, Set<Entity> entities) {
         Objects.requireNonNull(request, "request");
         Objects.requireNonNull(policySet, "policySet");
         Objects.requireNonNull(entities, "entities");
@@ -65,9 +62,7 @@ public class CedarEngine implements AutoCloseable {
     }
 
     public PartialAuthorizationResponse isAuthorizedPartial(
-            PartialAuthorizationRequest request,
-            PolicySet policySet,
-            Set<Entity> entities) {
+            PartialAuthorizationRequest request, PolicySet policySet, Set<Entity> entities) {
         Objects.requireNonNull(request, "request");
         Objects.requireNonNull(policySet, "policySet");
         Objects.requireNonNull(entities, "entities");
@@ -78,15 +73,13 @@ public class CedarEngine implements AutoCloseable {
             root.set("entities", mapper.valueToTree(entities));
             json = mapper.writeValueAsString(root);
         } catch (JsonProcessingException e) {
-            throw new CedarException(
-                    "Failed to serialize partial authorization request", e);
+            throw new CedarException("Failed to serialize partial authorization request", e);
         }
         String result = wasm.call("AuthorizationPartialOperation", json);
         try {
             return mapper.readValue(result, PartialAuthorizationResponse.class);
         } catch (JsonProcessingException e) {
-            throw new CedarException(
-                    "Failed to parse partial authorization response", e);
+            throw new CedarException("Failed to parse partial authorization response", e);
         }
     }
 
@@ -132,12 +125,10 @@ public class CedarEngine implements AutoCloseable {
         Objects.requireNonNull(policySet, "policySet");
         try {
             String json = mapper.writeValueAsString(policySet);
-            String result =
-                    wasm.callExport(wasm.exports()::cedarPreparsePolicySet, id, json);
+            String result = wasm.callExport(wasm.exports()::cedarPreparsePolicySet, id, json);
             CacheResponse response = mapper.readValue(result, CacheResponse.class);
             if (!response.isSuccess()) {
-                throw new CedarException(
-                        "Failed to cache policy set: " + response.errors());
+                throw new CedarException("Failed to cache policy set: " + response.errors());
             }
         } catch (JsonProcessingException e) {
             throw new CedarException("Failed to serialize policy set", e);
@@ -156,13 +147,10 @@ public class CedarEngine implements AutoCloseable {
             }
         }
         try {
-            String result =
-                    wasm.callExport(
-                            wasm.exports()::cedarPreparseSchema, id, schemaText);
+            String result = wasm.callExport(wasm.exports()::cedarPreparseSchema, id, schemaText);
             CacheResponse response = mapper.readValue(result, CacheResponse.class);
             if (!response.isSuccess()) {
-                throw new CedarException(
-                        "Failed to cache schema: " + response.errors());
+                throw new CedarException("Failed to cache schema: " + response.errors());
             }
         } catch (JsonProcessingException e) {
             throw new CedarException("Failed to parse cache response", e);
@@ -170,9 +158,7 @@ public class CedarEngine implements AutoCloseable {
     }
 
     public AuthorizationResponse isAuthorizedCached(
-            AuthorizationRequest request,
-            String policySetId,
-            Set<Entity> entities) {
+            AuthorizationRequest request, String policySetId, Set<Entity> entities) {
         return isAuthorizedCached(request, policySetId, null, entities);
     }
 
@@ -195,8 +181,7 @@ public class CedarEngine implements AutoCloseable {
             root.set("entities", mapper.valueToTree(entities));
             json = mapper.writeValueAsString(root);
         } catch (JsonProcessingException e) {
-            throw new CedarException(
-                    "Failed to serialize cached authorization request", e);
+            throw new CedarException("Failed to serialize cached authorization request", e);
         }
         String result = wasm.statefulAuthorize(json);
         try {
@@ -233,8 +218,7 @@ public class CedarEngine implements AutoCloseable {
 
         private Builder() {}
 
-        public Builder extensionFunction(
-                String name, Function<JsonNode, JsonNode> callback) {
+        public Builder extensionFunction(String name, Function<JsonNode, JsonNode> callback) {
             Objects.requireNonNull(name, "name");
             Objects.requireNonNull(callback, "callback");
             if (!extensionNames.add(name)) {

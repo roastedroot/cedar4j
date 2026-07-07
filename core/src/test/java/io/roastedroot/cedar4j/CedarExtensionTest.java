@@ -121,9 +121,7 @@ public class CedarExtensionTest {
     void extReturnsString() {
         CedarEngine engine =
                 CedarEngine.builder()
-                        .extensionFunction(
-                                "classify",
-                                args -> TextNode.valueOf("safe"))
+                        .extensionFunction("classify", args -> TextNode.valueOf("safe"))
                         .build();
 
         Map<String, Object> context = new HashMap<>();
@@ -183,9 +181,7 @@ public class CedarExtensionTest {
                                         + " < 50 };",
                                 "p0"));
 
-        assertTrue(
-                engine.isAuthorized(request, policiesScore, Collections.emptySet())
-                        .isAllowed());
+        assertTrue(engine.isAuthorized(request, policiesScore, Collections.emptySet()).isAllowed());
 
         PolicySet policiesLabel =
                 PolicySet.of(
@@ -195,9 +191,7 @@ public class CedarExtensionTest {
                                         + " == \"safe\" };",
                                 "p0"));
 
-        assertTrue(
-                engine.isAuthorized(request, policiesLabel, Collections.emptySet())
-                        .isAllowed());
+        assertTrue(engine.isAuthorized(request, policiesLabel, Collections.emptySet()).isAllowed());
     }
 
     @Test
@@ -286,8 +280,7 @@ public class CedarExtensionTest {
                         .resource("Resource", "doc1")
                         .build();
 
-        PolicySet policies =
-                PolicySet.of(Policy.of("permit(principal,action,resource);", "p0"));
+        PolicySet policies = PolicySet.of(Policy.of("permit(principal,action,resource);", "p0"));
 
         AuthorizationResponse response =
                 engine.isAuthorized(request, policies, Collections.emptySet());
@@ -345,9 +338,7 @@ public class CedarExtensionTest {
                                                 "text_length",
                                                 args ->
                                                         IntNode.valueOf(
-                                                                args.get(0)
-                                                                        .asText()
-                                                                        .length()))
+                                                                args.get(0).asText().length()))
                                         .build());
 
         AtomicBoolean allPassed = new AtomicBoolean(true);
@@ -372,9 +363,9 @@ public class CedarExtensionTest {
                                             PolicySet.of(
                                                     Policy.of(
                                                             "permit(principal,action,resource)"
-                                                                + " when {"
-                                                                + " ext(\"text_length\","
-                                                                + " context.text) > 5 };",
+                                                                    + " when {"
+                                                                    + " ext(\"text_length\","
+                                                                    + " context.text) > 5 };",
                                                             "p0"));
 
                                     AuthorizationResponse response =

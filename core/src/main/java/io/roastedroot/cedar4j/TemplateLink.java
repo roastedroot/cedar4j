@@ -76,8 +76,7 @@ public final class TemplateLink {
 
         @JsonCreator
         private LinkValue(
-                @JsonProperty("slot") String slot,
-                @JsonProperty("value") EntityUID value) {
+                @JsonProperty("slot") String slot, @JsonProperty("value") EntityUID value) {
             this.slot = Objects.requireNonNull(slot, "slot");
             this.value = Objects.requireNonNull(value, "value");
         }
@@ -101,8 +100,7 @@ public final class TemplateLink {
             if (this == o) return true;
             if (!(o instanceof LinkValue)) return false;
             LinkValue that = (LinkValue) o;
-            return Objects.equals(slot, that.slot)
-                    && Objects.equals(value, that.value);
+            return Objects.equals(slot, that.slot) && Objects.equals(value, that.value);
         }
 
         @Override

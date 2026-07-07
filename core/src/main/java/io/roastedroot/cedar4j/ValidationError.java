@@ -11,8 +11,7 @@ public final class ValidationError {
 
     @JsonCreator
     private ValidationError(
-            @JsonProperty("policyId") String policyId,
-            @JsonProperty("error") DetailedError error) {
+            @JsonProperty("policyId") String policyId, @JsonProperty("error") DetailedError error) {
         this.policyId = policyId;
         this.error = error;
     }

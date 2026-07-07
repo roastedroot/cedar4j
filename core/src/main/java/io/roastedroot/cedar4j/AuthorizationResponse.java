@@ -25,9 +25,7 @@ public final class AuthorizationResponse {
             @JsonProperty("warnings") List<DetailedError> warnings) {
         this.success = "success".equals(type);
         this.warnings =
-                warnings != null
-                        ? Collections.unmodifiableList(warnings)
-                        : Collections.emptyList();
+                warnings != null ? Collections.unmodifiableList(warnings) : Collections.emptyList();
 
         if (this.success && response != null) {
             this.decision = response.decision;

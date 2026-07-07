@@ -38,16 +38,17 @@ class CedarWasm {
     static CedarWasm create(Map<String, ExtensionFunction> extensions) {
         AtomicReference<CedarWasm> wasmRef = new AtomicReference<>();
 
-        CedarExports_ModuleImports imports = () -> {
-            return (int namePtr, int nameLen, int argsPtr, int argsLen) -> {
-                CedarWasm w = wasmRef.get();
-                if (w == null) {
-                    throw new CedarException("host_extension_call: not initialized");
-                }
-                return w.handleExtensionCall(
-                        extensions, namePtr, nameLen, argsPtr, argsLen);
-            };
-        };
+        CedarExports_ModuleImports imports =
+                () -> {
+                    return (int namePtr, int nameLen, int argsPtr, int argsLen) -> {
+                        CedarWasm w = wasmRef.get();
+                        if (w == null) {
+                            throw new CedarException("host_extension_call: not initialized");
+                        }
+                        return w.handleExtensionCall(
+                                extensions, namePtr, nameLen, argsPtr, argsLen);
+                    };
+                };
 
         Instance inst =
                 Instance.builder(CedarModule.load())
@@ -70,11 +71,12 @@ class CedarWasm {
 
     private long handleExtensionCall(
             Map<String, ExtensionFunction> extensions,
-            int namePtr, int nameLen, int argsPtr, int argsLen) {
-        String funcName =
-                new String(memory.readBytes(namePtr, nameLen), StandardCharsets.UTF_8);
-        String argsJson =
-                new String(memory.readBytes(argsPtr, argsLen), StandardCharsets.UTF_8);
+            int namePtr,
+            int nameLen,
+            int argsPtr,
+            int argsLen) {
+        String funcName = new String(memory.readBytes(namePtr, nameLen), StandardCharsets.UTF_8);
+        String argsJson = new String(memory.readBytes(argsPtr, argsLen), StandardCharsets.UTF_8);
 
         ExtensionFunction extFn = extensions.get(funcName);
         if (extFn == null) {
@@ -123,8 +125,7 @@ class CedarWasm {
         int opPtr = allocAndWrite(opBytes);
         int inputPtr = allocAndWrite(inputBytes);
         try {
-            int widePtr =
-                    exports.cedarCall(opPtr, opBytes.length, inputPtr, inputBytes.length);
+            int widePtr = exports.cedarCall(opPtr, opBytes.length, inputPtr, inputBytes.length);
             return readWidePtr(widePtr);
         } finally {
             exports.dealloc(opPtr, opBytes.length);

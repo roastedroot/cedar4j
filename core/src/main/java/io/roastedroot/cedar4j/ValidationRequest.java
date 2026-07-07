@@ -50,8 +50,7 @@ public final class ValidationRequest {
                 schemaValue = schema.text();
             } else {
                 try {
-                    schemaValue =
-                            CedarEngine.DEFAULT_MAPPER.readTree(schema.text());
+                    schemaValue = CedarEngine.DEFAULT_MAPPER.readTree(schema.text());
                 } catch (Exception e) {
                     throw new CedarException("Invalid JSON schema", e);
                 }

@@ -44,8 +44,7 @@ public final class Entity {
         return new Entity(uid, null, parents, null);
     }
 
-    public static Entity of(
-            EntityUID uid, Map<String, Object> attrs, Set<EntityUID> parents) {
+    public static Entity of(EntityUID uid, Map<String, Object> attrs, Set<EntityUID> parents) {
         return new Entity(uid, attrs, parents, null);
     }
 

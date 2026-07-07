@@ -2,7 +2,6 @@ package io.roastedroot.cedar4j;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -39,8 +38,7 @@ public class CedarEngineTest {
                         .resource("Resource", "doc1")
                         .build();
 
-        PolicySet policies =
-                PolicySet.of(Policy.of("permit(principal,action,resource);", "p0"));
+        PolicySet policies = PolicySet.of(Policy.of("permit(principal,action,resource);", "p0"));
 
         AuthorizationResponse response =
                 engine.isAuthorized(request, policies, Collections.emptySet());
@@ -59,8 +57,7 @@ public class CedarEngineTest {
                         .resource("Resource", "doc1")
                         .build();
 
-        PolicySet policies =
-                PolicySet.of(Policy.of("forbid(principal,action,resource);", "p0"));
+        PolicySet policies = PolicySet.of(Policy.of("forbid(principal,action,resource);", "p0"));
 
         AuthorizationResponse response =
                 engine.isAuthorized(request, policies, Collections.emptySet());
@@ -180,8 +177,8 @@ public class CedarEngineTest {
     @Test
     void parseTemplate() {
         String result =
-                engine.raw().parseTemplate(
-                        "permit(principal==?principal,action,resource==?resource);");
+                engine.raw()
+                        .parseTemplate("permit(principal==?principal,action,resource==?resource);");
         assertFalse(result.startsWith("ERROR:"), "Parse failed: " + result);
     }
 
@@ -189,8 +186,9 @@ public class CedarEngineTest {
     void templateEffect() {
         assertEquals(
                 "permit",
-                engine.raw().templateEffect(
-                        "permit(principal==?principal,action,resource==?resource);"));
+                engine.raw()
+                        .templateEffect(
+                                "permit(principal==?principal,action,resource==?resource);"));
     }
 
     @Test
@@ -206,8 +204,7 @@ public class CedarEngineTest {
 
     @Test
     void policyAnnotations() {
-        String policy =
-                "@id(\"myPolicy\") @myKey(\"myValue\") permit(principal,action,resource);";
+        String policy = "@id(\"myPolicy\") @myKey(\"myValue\") permit(principal,action,resource);";
         String annotations = engine.raw().policyAnnotations(policy);
         assertFalse(annotations.startsWith("ERROR:"), "annotations failed: " + annotations);
         assertTrue(annotations.contains("\"id\""), "Expected 'id' annotation");
@@ -266,7 +263,8 @@ public class CedarEngineTest {
         ValidationRequest request =
                 ValidationRequest.builder()
                         .schema(schema)
-                        .policies(PolicySet.of(Policy.of("permit(principal,action,resource);", "p0")))
+                        .policies(
+                                PolicySet.of(Policy.of("permit(principal,action,resource);", "p0")))
                         .build();
 
         ValidationResponse response = engine.validate(request);
@@ -292,8 +290,8 @@ public class CedarEngineTest {
                                 PolicySet.of(
                                         Policy.of(
                                                 "permit(principal == User::\"alice\","
-                                                    + " action == Action::\"bogus\","
-                                                    + " resource);",
+                                                        + " action == Action::\"bogus\","
+                                                        + " resource);",
                                                 "p0")))
                         .build();
 
@@ -305,8 +303,7 @@ public class CedarEngineTest {
 
     @Test
     void typedEntityValidation() {
-        Schema schema =
-                Schema.fromCedar("entity User;\nentity Photo;\n");
+        Schema schema = Schema.fromCedar("entity User;\nentity Photo;\n");
 
         EntityValidationRequest request =
                 EntityValidationRequest.builder()
@@ -327,8 +324,7 @@ public class CedarEngineTest {
                         .resource("Resource", "doc1")
                         .build();
 
-        PolicySet policies =
-                PolicySet.of(Policy.of("permit(principal,action,resource);", "p0"));
+        PolicySet policies = PolicySet.of(Policy.of("permit(principal,action,resource);", "p0"));
 
         PartialAuthorizationResponse response =
                 engine.isAuthorizedPartial(request, policies, Collections.emptySet());
@@ -348,8 +344,7 @@ public class CedarEngineTest {
         PolicySet policies =
                 PolicySet.of(
                         Policy.of(
-                                "permit(principal == User::\"alice\","
-                                        + "action,resource);",
+                                "permit(principal == User::\"alice\"," + "action,resource);",
                                 "p0"));
 
         PartialAuthorizationResponse response =
@@ -360,8 +355,7 @@ public class CedarEngineTest {
 
     @Test
     void typedCachedAuthorization() {
-        PolicySet policies =
-                PolicySet.of(Policy.of("permit(principal,action,resource);", "p0"));
+        PolicySet policies = PolicySet.of(Policy.of("permit(principal,action,resource);", "p0"));
         engine.cachePolicySet("cached-policies", policies);
 
         AuthorizationRequest request =
@@ -372,8 +366,7 @@ public class CedarEngineTest {
                         .build();
 
         AuthorizationResponse response =
-                engine.isAuthorizedCached(
-                        request, "cached-policies", Collections.emptySet());
+                engine.isAuthorizedCached(request, "cached-policies", Collections.emptySet());
 
         assertTrue(response.isAllowed());
     }

@@ -13,13 +13,10 @@ final class CacheResponse {
 
     @JsonCreator
     CacheResponse(
-            @JsonProperty("type") String type,
-            @JsonProperty("errors") List<DetailedError> errors) {
+            @JsonProperty("type") String type, @JsonProperty("errors") List<DetailedError> errors) {
         this.success = "success".equals(type);
         this.errors =
-                errors != null
-                        ? Collections.unmodifiableList(errors)
-                        : Collections.emptyList();
+                errors != null ? Collections.unmodifiableList(errors) : Collections.emptyList();
     }
 
     boolean isSuccess() {

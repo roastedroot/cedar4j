@@ -18,9 +18,7 @@ public final class EntityValidationResponse {
             @JsonProperty("errors") List<String> errors) {
         this.success = "true".equals(successStr);
         this.errors =
-                errors != null
-                        ? Collections.unmodifiableList(errors)
-                        : Collections.emptyList();
+                errors != null ? Collections.unmodifiableList(errors) : Collections.emptyList();
     }
 
     public boolean isSuccess() {
@@ -36,8 +34,7 @@ public final class EntityValidationResponse {
         if (this == o) return true;
         if (!(o instanceof EntityValidationResponse)) return false;
         EntityValidationResponse that = (EntityValidationResponse) o;
-        return success == that.success
-                && Objects.equals(errors, that.errors);
+        return success == that.success && Objects.equals(errors, that.errors);
     }
 
     @Override

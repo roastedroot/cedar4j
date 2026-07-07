@@ -129,8 +129,7 @@ public final class AuthorizationRequest {
 
         public AuthorizationRequest build() {
             return new AuthorizationRequest(
-                    principal, action, resource, context,
-                    schema, enableRequestValidation);
+                    principal, action, resource, context, schema, enableRequestValidation);
         }
     }
 }

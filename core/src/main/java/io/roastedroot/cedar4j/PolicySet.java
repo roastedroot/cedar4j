@@ -17,9 +17,7 @@ public final class PolicySet {
     private final List<TemplateLink> templateLinks;
 
     private PolicySet(
-            Set<Policy> policies,
-            Set<Policy> templates,
-            List<TemplateLink> templateLinks) {
+            Set<Policy> policies, Set<Policy> templates, List<TemplateLink> templateLinks) {
         this.policies =
                 policies != null
                         ? Collections.unmodifiableSet(new LinkedHashSet<>(policies))
@@ -43,9 +41,7 @@ public final class PolicySet {
     }
 
     public static PolicySet of(
-            Set<Policy> policies,
-            Set<Policy> templates,
-            List<TemplateLink> templateLinks) {
+            Set<Policy> policies, Set<Policy> templates, List<TemplateLink> templateLinks) {
         return new PolicySet(policies, templates, templateLinks);
     }
 

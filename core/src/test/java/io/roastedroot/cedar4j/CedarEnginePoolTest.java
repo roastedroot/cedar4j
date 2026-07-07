@@ -29,8 +29,7 @@ public class CedarEnginePoolTest {
         CedarEnginePool pool = CedarEnginePool.create(2);
         try (CedarEnginePool.Loan loan = pool.borrow()) {
             AuthorizationResponse response =
-                    loan.engine()
-                            .isAuthorized(REQUEST, POLICIES, Collections.emptySet());
+                    loan.engine().isAuthorized(REQUEST, POLICIES, Collections.emptySet());
             assertTrue(response.isAllowed());
         }
     }
@@ -61,9 +60,7 @@ public class CedarEnginePoolTest {
                                     try (CedarEnginePool.Loan loan = pool.borrow()) {
                                         return loan.engine()
                                                 .isAuthorized(
-                                                        REQUEST,
-                                                        POLICIES,
-                                                        Collections.emptySet());
+                                                        REQUEST, POLICIES, Collections.emptySet());
                                     }
                                 }));
             }

@@ -32,9 +32,7 @@ public final class PartialAuthorizationResponse {
             @JsonProperty("warnings") List<DetailedError> warnings) {
         this.success = "residuals".equals(type);
         this.warnings =
-                warnings != null
-                        ? Collections.unmodifiableList(warnings)
-                        : Collections.emptyList();
+                warnings != null ? Collections.unmodifiableList(warnings) : Collections.emptyList();
 
         if (this.success && response != null) {
             this.decision = response.decision;
@@ -44,8 +42,7 @@ public final class PartialAuthorizationResponse {
             this.mustBeDetermining = unmodifiableOrEmpty(response.mustBeDetermining);
             this.residuals =
                     response.residuals != null
-                            ? Collections.unmodifiableMap(
-                                    new LinkedHashMap<>(response.residuals))
+                            ? Collections.unmodifiableMap(new LinkedHashMap<>(response.residuals))
                             : Collections.emptyMap();
             this.nontrivialResiduals = unmodifiableOrEmpty(response.nontrivialResiduals);
             this.errors = Collections.emptyList();

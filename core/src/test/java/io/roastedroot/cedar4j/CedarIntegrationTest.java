@@ -31,8 +31,7 @@ import org.junit.jupiter.api.TestFactory;
 public class CedarIntegrationTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final Path CACHE_DIR =
-            Path.of(".cache", "cedar-integration-tests-main");
+    private static final Path CACHE_DIR = Path.of(".cache", "cedar-integration-tests-main");
     private static CedarEngine engine;
 
     @BeforeAll
@@ -76,8 +75,7 @@ public class CedarIntegrationTest {
                     files.filter(
                                     p ->
                                             p.toString().endsWith(".json")
-                                                    && !p.toString()
-                                                            .endsWith(".entities.json"))
+                                                    && !p.toString().endsWith(".entities.json"))
                             .sorted()
                             .collect(Collectors.toList());
             for (Path jsonFile : jsonFiles) {
@@ -91,8 +89,7 @@ public class CedarIntegrationTest {
         return containers;
     }
 
-    private DynamicContainer buildTestContainer(Path jsonFile, TestSpec spec)
-            throws IOException {
+    private DynamicContainer buildTestContainer(Path jsonFile, TestSpec spec) throws IOException {
         Path baseDir = CACHE_DIR;
 
         String policiesRaw = Files.readString(baseDir.resolve(spec.policies));
@@ -116,27 +113,19 @@ public class CedarIntegrationTest {
         List<DynamicTest> tests = new ArrayList<>();
         for (int i = 0; i < spec.requests.size(); i++) {
             TestRequest req = spec.requests.get(i);
-            String testName =
-                    req.description != null ? req.description : "request " + i;
+            String testName = req.description != null ? req.description : "request " + i;
             JsonNode finalSchema = schemaNode;
             tests.add(
                     DynamicTest.dynamicTest(
                             testName,
-                            () ->
-                                    executeRequest(
-                                            policiesNode,
-                                            entitiesNode,
-                                            finalSchema,
-                                            req)));
+                            () -> executeRequest(policiesNode, entitiesNode, finalSchema, req)));
         }
 
-        String containerName =
-                CACHE_DIR.relativize(jsonFile).toString().replace(".json", "");
+        String containerName = CACHE_DIR.relativize(jsonFile).toString().replace(".json", "");
         return DynamicContainer.dynamicContainer(containerName, tests);
     }
 
-    private JsonNode buildPoliciesNode(String policiesRaw, String policiesPath)
-            throws IOException {
+    private JsonNode buildPoliciesNode(String policiesRaw, String policiesPath) throws IOException {
         if (policiesPath.endsWith(".json")) {
             return MAPPER.readTree(policiesRaw);
         }
@@ -163,18 +152,13 @@ public class CedarIntegrationTest {
     }
 
     private void executeRequest(
-            JsonNode policiesNode,
-            JsonNode entitiesNode,
-            JsonNode schemaNode,
-            TestRequest req)
+            JsonNode policiesNode, JsonNode entitiesNode, JsonNode schemaNode, TestRequest req)
             throws Exception {
         ObjectNode request = MAPPER.createObjectNode();
         request.set("principal", MAPPER.valueToTree(req.principal));
         request.set("action", MAPPER.valueToTree(req.action));
         request.set("resource", MAPPER.valueToTree(req.resource));
-        request.set(
-                "context",
-                req.context != null ? req.context : MAPPER.createObjectNode());
+        request.set("context", req.context != null ? req.context : MAPPER.createObjectNode());
         if (schemaNode != null) {
             request.set("schema", schemaNode);
         }
@@ -182,25 +166,17 @@ public class CedarIntegrationTest {
         request.set("entities", entitiesNode);
 
         String resultJson = engine.raw().authorize(MAPPER.writeValueAsString(request));
-        AuthorizationResponse response =
-                MAPPER.readValue(resultJson, AuthorizationResponse.class);
+        AuthorizationResponse response = MAPPER.readValue(resultJson, AuthorizationResponse.class);
 
-        assertTrue(
-                response.isSuccess(),
-                "Authorization call failed for: " + req.description);
+        assertTrue(response.isSuccess(), "Authorization call failed for: " + req.description);
 
-        Decision expectedDecision =
-                "allow".equals(req.decision) ? Decision.ALLOW : Decision.DENY;
+        Decision expectedDecision = "allow".equals(req.decision) ? Decision.ALLOW : Decision.DENY;
         assertEquals(
-                expectedDecision,
-                response.decision(),
-                "Decision mismatch for: " + req.description);
+                expectedDecision, response.decision(), "Decision mismatch for: " + req.description);
 
         Set<String> expectedReasons = new HashSet<>(req.reason);
         assertEquals(
-                expectedReasons,
-                response.reasons(),
-                "Reasons mismatch for: " + req.description);
+                expectedReasons, response.reasons(), "Reasons mismatch for: " + req.description);
 
         assertEquals(
                 req.errors.size(),

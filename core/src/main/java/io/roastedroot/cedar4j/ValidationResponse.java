@@ -22,9 +22,7 @@ public final class ValidationResponse {
             @JsonProperty("validationErrors") List<ValidationError> validationErrors,
             @JsonProperty("validationWarnings") List<ValidationError> validationWarnings,
             @JsonProperty("errors") List<DetailedError> errors,
-            @JsonAlias("otherWarnings")
-                    @JsonProperty("warnings")
-                    List<DetailedError> warnings) {
+            @JsonAlias("otherWarnings") @JsonProperty("warnings") List<DetailedError> warnings) {
         this.success = "success".equals(type);
         this.validationErrors =
                 validationErrors != null
@@ -35,13 +33,9 @@ public final class ValidationResponse {
                         ? Collections.unmodifiableList(validationWarnings)
                         : Collections.emptyList();
         this.errors =
-                errors != null
-                        ? Collections.unmodifiableList(errors)
-                        : Collections.emptyList();
+                errors != null ? Collections.unmodifiableList(errors) : Collections.emptyList();
         this.warnings =
-                warnings != null
-                        ? Collections.unmodifiableList(warnings)
-                        : Collections.emptyList();
+                warnings != null ? Collections.unmodifiableList(warnings) : Collections.emptyList();
     }
 
     public boolean isSuccess() {
