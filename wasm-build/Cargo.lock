@@ -192,7 +192,6 @@ name = "cedar-wasm"
 version = "4.0.0"
 dependencies = [
  "cedar-policy",
- "cedar-policy-core",
  "cedar-policy-formatter",
  "itertools",
  "miette",

@@ -23,11 +23,6 @@ version = "4.0.0"
 git = "https://github.com/cedar-policy/cedar"
 tag = "v4.11.2"
 
-[dependencies.cedar-policy-core]
-version = "4.0.0"
-git = "https://github.com/cedar-policy/cedar"
-tag = "v4.11.2"
-
 [dependencies.cedar-policy-formatter]
 version = "4.0.0"
 git = "https://github.com/cedar-policy/cedar"

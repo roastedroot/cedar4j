@@ -1,19 +1,10 @@
 package io.roastedroot.cedar4j;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import run.endive.runtime.Instance;
 import run.endive.runtime.Memory;
 
 final class CedarWasm {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
     private final CedarExports_ModuleExports exports;
     private final Memory memory;
 
@@ -33,79 +24,11 @@ final class CedarWasm {
     }
 
     static CedarWasm create() {
-        return create(Collections.emptyMap());
-    }
-
-    static CedarWasm create(Map<String, ExtensionFunction> extensions) {
-        AtomicReference<CedarWasm> wasmRef = new AtomicReference<>();
-
-        CedarExports_ModuleImports imports =
-                () -> {
-                    return (int namePtr, int nameLen, int argsPtr, int argsLen) -> {
-                        CedarWasm w = wasmRef.get();
-                        if (w == null) {
-                            throw new CedarException("host_extension_call: not initialized");
-                        }
-                        return w.handleExtensionCall(
-                                extensions, namePtr, nameLen, argsPtr, argsLen);
-                    };
-                };
-
-        Instance inst =
+        Instance instance =
                 Instance.builder(CedarModule.load())
                         .withMachineFactory(CedarModule::create)
-                        .withImportValues(imports.toImportValues())
                         .build();
-
-        CedarWasm wasm = new CedarWasm(new CedarExports_ModuleExports(inst));
-        wasmRef.set(wasm);
-
-        if (!extensions.isEmpty()) {
-            String initResult = wasm.readWidePtr(wasm.exports().cedarInitHostExtensions());
-            if (!"OK".equals(initResult)) {
-                throw new CedarException("Host extension init failed: " + initResult);
-            }
-        }
-
-        return wasm;
-    }
-
-    private long handleExtensionCall(
-            Map<String, ExtensionFunction> extensions,
-            int namePtr,
-            int nameLen,
-            int argsPtr,
-            int argsLen) {
-        String funcName = new String(memory.readBytes(namePtr, nameLen), StandardCharsets.UTF_8);
-        String argsJson = new String(memory.readBytes(argsPtr, argsLen), StandardCharsets.UTF_8);
-
-        ExtensionFunction extFn = extensions.get(funcName);
-        if (extFn == null) {
-            throw new CedarException("Unknown extension function: " + funcName);
-        }
-
-        try {
-            JsonNode args = MAPPER.readTree(argsJson);
-            JsonNode result = extFn.invoke(args);
-            return writeResultToWasm(MAPPER.writeValueAsString(result));
-        } catch (JsonProcessingException | RuntimeException e) {
-            String msg = e.getMessage() != null ? e.getMessage() : "extension error";
-            try {
-                ObjectNode errorNode = MAPPER.createObjectNode();
-                errorNode.put("error", msg);
-                return writeResultToWasm(MAPPER.writeValueAsString(errorNode));
-            } catch (JsonProcessingException ex) {
-                return writeResultToWasm("{\"error\":\"extension error\"}");
-            }
-        }
-    }
-
-    private long writeResultToWasm(String json) {
-        byte[] resultBytes = json.getBytes(StandardCharsets.UTF_8);
-        int len = resultBytes.length;
-        int ptr = exports.alloc(len);
-        memory.write(ptr, resultBytes);
-        return ((long) len << 32) | (ptr & 0xFFFFFFFFL);
+        return new CedarWasm(new CedarExports_ModuleExports(instance));
     }
 
     CedarExports_ModuleExports exports() {

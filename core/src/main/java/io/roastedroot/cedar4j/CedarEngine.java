@@ -1,17 +1,10 @@
 package io.roastedroot.cedar4j;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 
 public final class CedarEngine implements AutoCloseable {
     public static final ObjectMapper DEFAULT_MAPPER = new ObjectMapper();
@@ -212,22 +205,9 @@ public final class CedarEngine implements AutoCloseable {
     }
 
     public static final class Builder {
-        private final List<ExtensionFunction> extensions = new ArrayList<>();
-        private final Set<String> extensionNames = new HashSet<>();
         private ObjectMapper mapper;
 
         private Builder() {}
-
-        public Builder extensionFunction(String name, Function<JsonNode, JsonNode> callback) {
-            Objects.requireNonNull(name, "name");
-            Objects.requireNonNull(callback, "callback");
-            if (!extensionNames.add(name)) {
-                throw new IllegalArgumentException(
-                        "Extension function already registered: " + name);
-            }
-            extensions.add(new ExtensionFunction(name, callback));
-            return this;
-        }
 
         public Builder withObjectMapper(ObjectMapper mapper) {
             this.mapper = Objects.requireNonNull(mapper, "mapper");
@@ -235,13 +215,8 @@ public final class CedarEngine implements AutoCloseable {
         }
 
         public CedarEngine build() {
-            Map<String, ExtensionFunction> extMap = new LinkedHashMap<>();
-            for (ExtensionFunction ext : extensions) {
-                extMap.put(ext.name(), ext);
-            }
             ObjectMapper m = mapper != null ? mapper : DEFAULT_MAPPER;
-            CedarWasm wasm = CedarWasm.create(extMap);
-            return new CedarEngine(wasm, m);
+            return new CedarEngine(CedarWasm.create(), m);
         }
     }
 }
