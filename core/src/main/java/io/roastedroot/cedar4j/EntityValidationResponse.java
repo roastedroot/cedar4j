@@ -6,11 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public final class EntityValidationResponse {
     private final boolean success;
-    private final List<String> errors;
+    private final List<DetailedError> errors;
 
     @JsonCreator
     EntityValidationResponse(
@@ -18,14 +19,19 @@ public final class EntityValidationResponse {
             @JsonProperty("errors") List<String> errors) {
         this.success = "true".equals(successStr);
         this.errors =
-                errors != null ? Collections.unmodifiableList(errors) : Collections.emptyList();
+                errors != null
+                        ? Collections.unmodifiableList(
+                                errors.stream()
+                                        .map(DetailedError::of)
+                                        .collect(Collectors.toList()))
+                        : Collections.emptyList();
     }
 
     public boolean isSuccess() {
         return success;
     }
 
-    public List<String> errors() {
+    public List<DetailedError> errors() {
         return errors;
     }
 

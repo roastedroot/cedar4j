@@ -58,7 +58,8 @@ AuthorizationRequest request = AuthorizationRequest.builder()
     .build();
 
 PolicySet policies = PolicySet.of(Policy.of(
-    "permit(principal, action, resource) when { principal in Group::\"admins\" };"));
+    "permit(principal, action, resource) when { principal in Group::\"admins\" };",
+    "admin-access"));
 
 AuthorizationResponse response = engine.isAuthorized(request, policies, entities);
 ```
@@ -77,7 +78,7 @@ ValidationRequest request = ValidationRequest.builder()
     .build();
 
 ValidationResponse response = engine.validate(request);
-response.validationPassed();     // true if no validation errors
+response.isValid();              // true if no validation errors
 response.validationErrors();     // list of ValidationError
 ```
 
@@ -105,7 +106,7 @@ PartialAuthorizationRequest partial = PartialAuthorizationRequest.builder()
 PartialAuthorizationResponse response = engine.isAuthorizedPartial(
     partial, policies, entities);
 
-response.decision();            // ALLOW, DENY, or null (indeterminate)
+response.decision();            // ALLOW or DENY
 response.nontrivialResiduals(); // policies that couldn't be fully evaluated
 ```
 
@@ -122,11 +123,25 @@ try (CedarEnginePool.Loan loan = pool.borrow()) {
 }
 ```
 
+### Custom ObjectMapper
+
+```java
+CedarEngine engine = CedarEngine.builder()
+    .withObjectMapper(myCustomMapper)
+    .build();
+```
+
 ### Raw JSON API
 
-A low-level string-based API is also available for advanced use cases.
-See `CedarEngine` for methods like `authorize(String)`, `validate(String)`,
-`parsePolicy(String)`, `formatPolicies(String)`, etc.
+A low-level string-based API is available for advanced use cases via `engine.raw()`:
+
+```java
+String result = engine.raw().authorize(requestJson);
+String parsed = engine.raw().parsePolicy(policyText);
+String formatted = engine.raw().formatPolicies(policiesText);
+```
+
+See `CedarRawEngine` for the full list of raw methods.
 
 ## Building
 

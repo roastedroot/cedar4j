@@ -14,6 +14,10 @@ public final class DetailedError {
         this.message = message;
     }
 
+    static DetailedError of(String message) {
+        return new DetailedError(message);
+    }
+
     public String message() {
         return message;
     }

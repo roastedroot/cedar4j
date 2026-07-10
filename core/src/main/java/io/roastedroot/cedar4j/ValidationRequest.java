@@ -1,14 +1,14 @@
 package io.roastedroot.cedar4j;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Objects;
 
 public final class ValidationRequest {
-    private final Object schema;
+    private final Schema schema;
     private final PolicySet policies;
 
-    private ValidationRequest(Object schema, PolicySet policies) {
+    private ValidationRequest(Schema schema, PolicySet policies) {
         this.schema = Objects.requireNonNull(schema, "schema");
         this.policies = Objects.requireNonNull(policies, "policies");
     }
@@ -17,8 +17,8 @@ public final class ValidationRequest {
         return new Builder();
     }
 
-    @JsonProperty("schema")
-    Object getSchema() {
+    @JsonIgnore
+    Schema schema() {
         return schema;
     }
 
@@ -46,17 +46,7 @@ public final class ValidationRequest {
         public ValidationRequest build() {
             Objects.requireNonNull(schema, "schema");
             Objects.requireNonNull(policies, "policies");
-            Object schemaValue;
-            if (schema.format() == Schema.Format.CEDAR) {
-                schemaValue = schema.text();
-            } else {
-                try {
-                    schemaValue = CedarEngine.DEFAULT_MAPPER.readTree(schema.text());
-                } catch (JsonProcessingException e) {
-                    throw new CedarException("Invalid JSON schema", e);
-                }
-            }
-            return new ValidationRequest(schemaValue, policies);
+            return new ValidationRequest(schema, policies);
         }
     }
 }

@@ -151,7 +151,7 @@ public class CedarEngineTest {
                 () ->
                         engine.isAuthorized(
                                 null,
-                                PolicySet.of(Policy.of("permit(principal,action,resource);")),
+                                PolicySet.of(Policy.of("permit(principal,action,resource);", "p0")),
                                 Collections.emptySet()));
     }
 
