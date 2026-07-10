@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.Set;
 
 public final class CedarEngine implements AutoCloseable {
-    public static final ObjectMapper DEFAULT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper DEFAULT_MAPPER = new ObjectMapper();
 
     private final CedarWasm wasm;
     private final ObjectMapper mapper;
@@ -80,7 +80,9 @@ public final class CedarEngine implements AutoCloseable {
         Objects.requireNonNull(request, "request");
         String json;
         try {
-            json = mapper.writeValueAsString(request);
+            ObjectNode root = mapper.valueToTree(request);
+            serializeSchema(root, request.schema());
+            json = mapper.writeValueAsString(root);
         } catch (JsonProcessingException e) {
             throw new CedarException("Failed to serialize validation request", e);
         }
@@ -96,7 +98,9 @@ public final class CedarEngine implements AutoCloseable {
         Objects.requireNonNull(request, "request");
         String json;
         try {
-            json = mapper.writeValueAsString(request);
+            ObjectNode root = mapper.valueToTree(request);
+            serializeSchema(root, request.schema());
+            json = mapper.writeValueAsString(root);
         } catch (JsonProcessingException e) {
             throw new CedarException("Failed to serialize entity validation request", e);
         }

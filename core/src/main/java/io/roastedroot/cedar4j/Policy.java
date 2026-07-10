@@ -9,12 +9,7 @@ public final class Policy {
 
     private Policy(String policySrc, String policyId) {
         this.policySrc = Objects.requireNonNull(policySrc, "policySrc");
-        this.policyId =
-                policyId != null ? policyId : "policy_" + Integer.toHexString(policySrc.hashCode());
-    }
-
-    public static Policy of(String policySrc) {
-        return new Policy(policySrc, null);
+        this.policyId = Objects.requireNonNull(policyId, "policyId");
     }
 
     public static Policy of(String policySrc, String policyId) {

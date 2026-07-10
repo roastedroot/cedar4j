@@ -1,15 +1,15 @@
 package io.roastedroot.cedar4j;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Objects;
 import java.util.Set;
 
 public final class EntityValidationRequest {
-    private final Object schema;
+    private final Schema schema;
     private final Set<Entity> entities;
 
-    private EntityValidationRequest(Object schema, Set<Entity> entities) {
+    private EntityValidationRequest(Schema schema, Set<Entity> entities) {
         this.schema = Objects.requireNonNull(schema, "schema");
         this.entities = Objects.requireNonNull(entities, "entities");
     }
@@ -18,8 +18,8 @@ public final class EntityValidationRequest {
         return new Builder();
     }
 
-    @JsonProperty("schema")
-    Object getSchema() {
+    @JsonIgnore
+    Schema schema() {
         return schema;
     }
 
@@ -47,17 +47,7 @@ public final class EntityValidationRequest {
         public EntityValidationRequest build() {
             Objects.requireNonNull(schema, "schema");
             Objects.requireNonNull(entities, "entities");
-            Object schemaValue;
-            if (schema.format() == Schema.Format.CEDAR) {
-                schemaValue = schema.text();
-            } else {
-                try {
-                    schemaValue = CedarEngine.DEFAULT_MAPPER.readTree(schema.text());
-                } catch (JsonProcessingException e) {
-                    throw new CedarException("Invalid JSON schema", e);
-                }
-            }
-            return new EntityValidationRequest(schemaValue, entities);
+            return new EntityValidationRequest(schema, entities);
         }
     }
 }
