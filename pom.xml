@@ -55,7 +55,7 @@
     <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
 
     <!-- test time versions -->
-    <junit.version>5.14.4</junit.version>
+    <junit.version>6.1.1</junit.version>
     <jackson.version>2.21.3</jackson.version>
 
     <!-- runtime versions -->
