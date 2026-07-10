@@ -72,10 +72,14 @@ public final class CedarEnginePool implements AutoCloseable {
     @Override
     public void close() {
         if (closed.compareAndSet(false, true)) {
-            CedarEngine engine;
-            while ((engine = pool.pollFirst()) != null) {
-                engine.close();
-            }
+            drainPool();
+        }
+    }
+
+    private void drainPool() {
+        CedarEngine e;
+        while ((e = pool.pollFirst()) != null) {
+            e.close();
         }
     }
 
@@ -104,10 +108,9 @@ public final class CedarEnginePool implements AutoCloseable {
         @Override
         public void close() {
             if (engine != null) {
+                pool.offerFirst(engine);
                 if (closed.get()) {
-                    engine.close();
-                } else {
-                    pool.offerFirst(engine);
+                    drainPool();
                 }
                 engine = null;
                 semaphore.release();

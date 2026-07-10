@@ -1,6 +1,7 @@
 package io.roastedroot.cedar4j;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -40,6 +41,16 @@ public class CedarEnginePoolTest {
         CedarEnginePool.Loan loan = pool.borrow();
         assertNotNull(loan.engine());
         loan.discard();
+    }
+
+    @Test
+    void closeDrainsPoolAndRejectsNewBorrows() throws Exception {
+        CedarEnginePool pool = CedarEnginePool.create(2);
+        try (CedarEnginePool.Loan loan = pool.borrow()) {
+            assertNotNull(loan.engine());
+        }
+        pool.close();
+        assertThrows(IllegalStateException.class, pool::borrow);
     }
 
     @Test
