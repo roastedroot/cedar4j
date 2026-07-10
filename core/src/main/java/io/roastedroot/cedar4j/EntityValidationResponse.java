@@ -21,9 +21,7 @@ public final class EntityValidationResponse {
         this.errors =
                 errors != null
                         ? Collections.unmodifiableList(
-                                errors.stream()
-                                        .map(DetailedError::of)
-                                        .collect(Collectors.toList()))
+                                errors.stream().map(DetailedError::of).collect(Collectors.toList()))
                         : Collections.emptyList();
     }
 
