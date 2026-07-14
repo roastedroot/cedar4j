@@ -59,7 +59,7 @@
     <jackson.version>2.22.1</jackson.version>
 
     <!-- runtime versions -->
-    <endive.version>1.0.0</endive.version>
+    <endive.version>1.0.1</endive.version>
   </properties>
 
   <dependencyManagement>
