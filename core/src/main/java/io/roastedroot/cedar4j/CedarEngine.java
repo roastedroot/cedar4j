@@ -175,6 +175,14 @@ public final class CedarEngine implements AutoCloseable {
         Objects.requireNonNull(request, "request");
         Objects.requireNonNull(policySetId, "policySetId");
         Objects.requireNonNull(entities, "entities");
+        // The stateful FFI call only takes a preparsed schema name, so an inline schema cannot be
+        // forwarded. Dropping it silently would cost the caller schema-directed context parsing.
+        if (request.schema() != null && schemaId == null) {
+            throw new IllegalArgumentException(
+                    "isAuthorizedCached cannot use an inline schema; cache it with"
+                            + " cacheSchema(id, schema) and pass the id to"
+                            + " isAuthorizedCached(request, policySetId, schemaId, entities)");
+        }
         String json;
         try {
             ObjectNode root = mapper.valueToTree(request);
