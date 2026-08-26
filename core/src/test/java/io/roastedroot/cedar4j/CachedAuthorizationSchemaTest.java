@@ -12,11 +12,7 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-/**
- * The FFI's stateful authorization call only accepts a preparsed schema name -- it has no inline
- * schema field -- so a schema attached to the request cannot be forwarded. Dropping it silently
- * costs the caller schema-directed context parsing without saying so.
- */
+/** The stateful FFI call only accepts a preparsed schema name, never an inline schema. */
 public class CachedAuthorizationSchemaTest {
 
     private static final String CEDAR_SCHEMA =

@@ -11,11 +11,7 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-/**
- * {@code cedar_preparse_schema} deserializes its argument as JSON, and the Cedar-format variant of
- * the FFI schema type is a JSON <em>string</em> — so the raw schema text has to be JSON-encoded on
- * the way in, exactly as the non-cached path already does.
- */
+/** {@code cedar_preparse_schema} parses its argument as JSON; the Cedar variant is a JSON string. */
 public class SchemaCacheTest {
 
     private static final String CEDAR_SCHEMA =
@@ -57,7 +53,7 @@ public class SchemaCacheTest {
                                         + " User::\"admin\" };",
                                 "p1")));
 
-        // The reserved __entity key would otherwise be read as an entity reference and match.
+        // Without a schema the reserved __entity key is read as an entity reference.
         Map<String, Object> euid = new LinkedHashMap<>();
         euid.put("type", "User");
         euid.put("id", "admin");

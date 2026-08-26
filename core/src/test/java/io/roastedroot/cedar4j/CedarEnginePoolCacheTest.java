@@ -15,11 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
-/**
- * The preparsed policy-set and schema caches live inside the Wasm instance, so they are per-engine.
- * Caching through the pool has to reach every engine it hands out, including ones it creates
- * lazily after the caching call.
- */
+/** Preparsed caches live inside the Wasm instance, so the pool must reach every engine. */
 public class CedarEnginePoolCacheTest {
 
     private static final String SCHEMA =
@@ -42,8 +38,7 @@ public class CedarEnginePoolCacheTest {
     @Test
     void cachedPolicySetReachesEveryEngineIncludingLazilyCreatedOnes() throws Exception {
         try (CedarEnginePool pool = CedarEnginePool.create(4)) {
-            // Force one engine to exist before caching, so both the already-created and the
-            // not-yet-created paths are exercised.
+            // Create one engine before caching, so both paths are covered.
             try (CedarEnginePool.Loan warm = pool.borrow()) {
                 assertTrue(
                         warm.engine()
@@ -161,7 +156,7 @@ public class CedarEnginePoolCacheTest {
 
     @Test
     void aBareEngineStillOnlySeesItsOwnCache() {
-        // The per-engine scope is intentional; the pool API is what spans engines.
+        // Per-engine scope is intentional; the pool API is what spans engines.
         CedarEngine one = CedarEngine.create();
         CedarEngine two = CedarEngine.create();
         one.cachePolicySet("ps", permitAll());

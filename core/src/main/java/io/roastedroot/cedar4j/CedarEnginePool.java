@@ -14,11 +14,7 @@ public final class CedarEnginePool implements AutoCloseable {
     private final Supplier<CedarEngine> engineFactory;
     private final AtomicBoolean closed = new AtomicBoolean(false);
 
-    /**
-     * Preparsed policy sets and schemas live inside a Wasm instance, so they are per-engine. Record
-     * the caching calls here and replay them onto each engine as it is borrowed: a Wasm instance is
-     * not thread-safe, so it may only be mutated by the thread that currently holds it.
-     */
+    /** Caching calls, replayed onto each engine as it is borrowed. */
     private final List<CacheOp> cacheOps = new CopyOnWriteArrayList<>();
 
     private CedarEnginePool(int maxSize, Supplier<CedarEngine> engineFactory) {
@@ -38,28 +34,19 @@ public final class CedarEnginePool implements AutoCloseable {
         return new CedarEnginePool(maxSize, engineFactory);
     }
 
-    /**
-     * Preparse a policy set under {@code id} on every engine this pool hands out, including engines
-     * it creates later. The policy set is parsed once immediately, so an invalid one fails here
-     * rather than on some unrelated later borrow.
-     */
+    /** Preparse a policy set under {@code id} on every engine this pool hands out. */
     public void cachePolicySet(String id, PolicySet policySet) {
         record(new CacheOp(id, policySet, null));
     }
 
-    /**
-     * Preparse a schema under {@code id} on every engine this pool hands out, including engines it
-     * creates later. The schema is parsed once immediately, so an invalid one fails here rather
-     * than on some unrelated later borrow.
-     */
+    /** Preparse a schema under {@code id} on every engine this pool hands out. */
     public void cacheSchema(String id, Schema schema) {
         record(new CacheOp(id, null, schema));
     }
 
     private void record(CacheOp op) {
         checkNotClosed();
-        // Validate against a real engine before recording, so a bad payload is reported to the
-        // caller instead of failing every future borrow.
+        // Apply once up front so a bad payload fails here, not on a later borrow.
         Loan loan;
         try {
             loan = borrow();
@@ -111,7 +98,7 @@ public final class CedarEnginePool implements AutoCloseable {
         return pooled;
     }
 
-    /** Replay any caching calls this engine has not seen. Only ever called by the owning thread. */
+    /** Replay unseen caching calls. Only ever called by the thread that owns the engine. */
     private void syncCache(PooledEngine pooled) {
         int total = cacheOps.size();
         for (int i = pooled.syncedOps; i < total; i++) {

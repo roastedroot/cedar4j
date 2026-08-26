@@ -138,8 +138,7 @@ public final class CedarEngine implements AutoCloseable {
     public void cacheSchema(String id, Schema schema) {
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(schema, "schema");
-        // The export parses its argument as JSON, and the Cedar-format variant of the FFI schema
-        // type is a JSON string -- so the raw text has to be encoded, not passed through.
+        // The export parses its argument as JSON; the Cedar variant is a JSON string.
         String payload;
         try {
             payload =
@@ -175,8 +174,7 @@ public final class CedarEngine implements AutoCloseable {
         Objects.requireNonNull(request, "request");
         Objects.requireNonNull(policySetId, "policySetId");
         Objects.requireNonNull(entities, "entities");
-        // The stateful FFI call only takes a preparsed schema name, so an inline schema cannot be
-        // forwarded. Dropping it silently would cost the caller schema-directed context parsing.
+        // The stateful call only takes a preparsed schema name; an inline schema cannot travel.
         if (request.schema() != null && schemaId == null) {
             throw new IllegalArgumentException(
                     "isAuthorizedCached cannot use an inline schema; cache it with"
@@ -209,12 +207,7 @@ public final class CedarEngine implements AutoCloseable {
         // Wasm memory is GC'd with the instance; contract established for future use
     }
 
-    /**
-     * Some Wasm exports answer with a bare {@code ERROR:<message>} string rather than the JSON
-     * envelope. Turn that into a {@link CedarException} carrying the module's own message, instead
-     * of letting Jackson fail on it and bury the cause. {@link CedarRawEngine} deliberately does
-     * not go through here, so {@code raw()} keeps returning the prefixed string verbatim.
-     */
+    /** Some exports answer with a bare {@code ERROR:<message>} instead of the JSON envelope. */
     private static String checkWasmError(String result) {
         if (result.startsWith(WASM_ERROR_PREFIX)) {
             throw new CedarException(result.substring(WASM_ERROR_PREFIX.length()));

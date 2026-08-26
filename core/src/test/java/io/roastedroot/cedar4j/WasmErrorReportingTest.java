@@ -7,14 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
-/**
- * Several Wasm exports answer with a bare {@code ERROR:<message>} string instead of the JSON
- * envelope. Feeding that to Jackson buries the real cause in a parse error, which is what kept the
- * schema-cache and template-link marshalling bugs invisible.
- */
+/** Some Wasm exports answer with a bare {@code ERROR:<message>} instead of the JSON envelope. */
 public class WasmErrorReportingTest {
 
-    /** Stands in for any marshalling drift that hands the module something it cannot parse. */
+    /** Stands in for marshalling drift that hands the module something unparseable. */
     private static final class BrokenMapper extends ObjectMapper {
         @Override
         public String writeValueAsString(Object value) {

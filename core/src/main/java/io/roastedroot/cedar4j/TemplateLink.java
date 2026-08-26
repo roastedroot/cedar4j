@@ -20,8 +20,7 @@ public final class TemplateLink {
                 linkValues != null
                         ? Collections.unmodifiableList(linkValues)
                         : Collections.emptyList();
-        // The FFI keys link values by slot and rejects duplicate keys, so a repeated slot is
-        // always an error -- surface it here rather than at serialization time.
+        // The FFI keys by slot and rejects duplicate keys.
         Map<String, EntityUID> seen = new LinkedHashMap<>();
         for (LinkValue value : this.linkValues) {
             if (seen.put(value.slot(), value.value()) != null) {
@@ -51,10 +50,7 @@ public final class TemplateLink {
         return linkValues;
     }
 
-    /**
-     * The FFI declares link values as a map from slot id to entity uid; the list form is the public
-     * API only.
-     */
+    /** The FFI declares link values as a map from slot id to entity uid. */
     @JsonProperty("values")
     Map<String, EntityUID> serializedValues() {
         Map<String, EntityUID> values = new LinkedHashMap<>();

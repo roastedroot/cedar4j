@@ -13,10 +13,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-/**
- * The FFI declares template link values as a map from slot id to entity uid. Serializing them as a
- * list of {slot, value} pairs makes the module reject the whole policy set.
- */
+/** The FFI declares template link values as a map from slot id to entity uid. */
 public class TemplateLinkTest {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
