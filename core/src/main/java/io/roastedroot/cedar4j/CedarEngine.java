@@ -138,18 +138,21 @@ public final class CedarEngine implements AutoCloseable {
     public void cacheSchema(String id, Schema schema) {
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(schema, "schema");
-        String schemaText = schema.text();
-        if (schema.format() == Schema.Format.JSON) {
-            try {
-                schemaText = mapper.writeValueAsString(mapper.readTree(schemaText));
-            } catch (JsonProcessingException e) {
-                throw new CedarException("Invalid JSON schema", e);
-            }
+        // The export parses its argument as JSON, and the Cedar-format variant of the FFI schema
+        // type is a JSON string -- so the raw text has to be encoded, not passed through.
+        String payload;
+        try {
+            payload =
+                    schema.format() == Schema.Format.CEDAR
+                            ? mapper.writeValueAsString(schema.text())
+                            : mapper.writeValueAsString(mapper.readTree(schema.text()));
+        } catch (JsonProcessingException e) {
+            throw new CedarException("Invalid " + schema.format() + " schema", e);
         }
         try {
             String result =
                     checkWasmError(
-                            wasm.callExport(wasm.exports()::cedarPreparseSchema, id, schemaText));
+                            wasm.callExport(wasm.exports()::cedarPreparseSchema, id, payload));
             CacheResponse response = mapper.readValue(result, CacheResponse.class);
             if (!response.isSuccess()) {
                 throw new CedarException("Failed to cache schema: " + response.errors());
