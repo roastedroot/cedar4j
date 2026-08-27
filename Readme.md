@@ -93,6 +93,21 @@ AuthorizationResponse response = engine.isAuthorizedCached(
     request, "my-policies", entities);
 ```
 
+Schemas can be pre-parsed the same way. On the cached path the schema must be
+referenced by id — an inline `request.schema()` is rejected, because the
+underlying call only accepts a pre-parsed schema name:
+
+```java
+engine.cacheSchema("my-schema", schema);
+
+AuthorizationResponse response = engine.isAuthorizedCached(
+    request, "my-policies", "my-schema", entities);
+```
+
+The cache lives inside the Wasm instance, so it is scoped to a single
+`CedarEngine`. To share it across a pool, cache on the pool rather than on a
+borrowed engine — see below.
+
 ### Partial authorization
 
 Evaluate with unknown principal, action, or resource:
@@ -120,6 +135,20 @@ CedarEnginePool pool = CedarEnginePool.create(4);
 try (CedarEnginePool.Loan loan = pool.borrow()) {
     AuthorizationResponse response = loan.engine().isAuthorized(
         request, policies, entities);
+}
+```
+
+Cache on the pool, not on a borrowed engine — each engine has its own Wasm
+instance and therefore its own cache. The pool replays cached entries onto
+every engine it hands out, including ones it creates later:
+
+```java
+pool.cachePolicySet("my-policies", policies);
+pool.cacheSchema("my-schema", schema);
+
+try (CedarEnginePool.Loan loan = pool.borrow()) {
+    AuthorizationResponse response = loan.engine().isAuthorizedCached(
+        request, "my-policies", "my-schema", entities);
 }
 ```
 

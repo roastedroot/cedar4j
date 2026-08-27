@@ -8,6 +8,7 @@ import java.util.Set;
 
 public final class CedarEngine implements AutoCloseable {
     private static final ObjectMapper DEFAULT_MAPPER = new ObjectMapper();
+    private static final String WASM_ERROR_PREFIX = "ERROR:";
 
     private final CedarWasm wasm;
     private final ObjectMapper mapper;
@@ -46,7 +47,7 @@ public final class CedarEngine implements AutoCloseable {
         } catch (JsonProcessingException e) {
             throw new CedarException("Failed to serialize authorization request", e);
         }
-        String result = wasm.authorize(json);
+        String result = checkWasmError(wasm.authorize(json));
         try {
             return mapper.readValue(result, AuthorizationResponse.class);
         } catch (JsonProcessingException e) {
@@ -68,7 +69,7 @@ public final class CedarEngine implements AutoCloseable {
         } catch (JsonProcessingException e) {
             throw new CedarException("Failed to serialize partial authorization request", e);
         }
-        String result = wasm.call("AuthorizationPartialOperation", json);
+        String result = checkWasmError(wasm.call("AuthorizationPartialOperation", json));
         try {
             return mapper.readValue(result, PartialAuthorizationResponse.class);
         } catch (JsonProcessingException e) {
@@ -86,7 +87,7 @@ public final class CedarEngine implements AutoCloseable {
         } catch (JsonProcessingException e) {
             throw new CedarException("Failed to serialize validation request", e);
         }
-        String result = wasm.call("ValidateOperation", json);
+        String result = checkWasmError(wasm.call("ValidateOperation", json));
         try {
             return mapper.readValue(result, ValidationResponse.class);
         } catch (JsonProcessingException e) {
@@ -104,7 +105,7 @@ public final class CedarEngine implements AutoCloseable {
         } catch (JsonProcessingException e) {
             throw new CedarException("Failed to serialize entity validation request", e);
         }
-        String result = wasm.call("ValidateEntities", json);
+        String result = checkWasmError(wasm.call("ValidateEntities", json));
         try {
             return mapper.readValue(result, EntityValidationResponse.class);
         } catch (JsonProcessingException e) {
@@ -122,7 +123,9 @@ public final class CedarEngine implements AutoCloseable {
         Objects.requireNonNull(policySet, "policySet");
         try {
             String json = mapper.writeValueAsString(policySet);
-            String result = wasm.callExport(wasm.exports()::cedarPreparsePolicySet, id, json);
+            String result =
+                    checkWasmError(
+                            wasm.callExport(wasm.exports()::cedarPreparsePolicySet, id, json));
             CacheResponse response = mapper.readValue(result, CacheResponse.class);
             if (!response.isSuccess()) {
                 throw new CedarException("Failed to cache policy set: " + response.errors());
@@ -135,16 +138,20 @@ public final class CedarEngine implements AutoCloseable {
     public void cacheSchema(String id, Schema schema) {
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(schema, "schema");
-        String schemaText = schema.text();
-        if (schema.format() == Schema.Format.JSON) {
-            try {
-                schemaText = mapper.writeValueAsString(mapper.readTree(schemaText));
-            } catch (JsonProcessingException e) {
-                throw new CedarException("Invalid JSON schema", e);
-            }
+        // The export parses its argument as JSON; the Cedar variant is a JSON string.
+        String payload;
+        try {
+            payload =
+                    schema.format() == Schema.Format.CEDAR
+                            ? mapper.writeValueAsString(schema.text())
+                            : mapper.writeValueAsString(mapper.readTree(schema.text()));
+        } catch (JsonProcessingException e) {
+            throw new CedarException("Invalid " + schema.format() + " schema", e);
         }
         try {
-            String result = wasm.callExport(wasm.exports()::cedarPreparseSchema, id, schemaText);
+            String result =
+                    checkWasmError(
+                            wasm.callExport(wasm.exports()::cedarPreparseSchema, id, payload));
             CacheResponse response = mapper.readValue(result, CacheResponse.class);
             if (!response.isSuccess()) {
                 throw new CedarException("Failed to cache schema: " + response.errors());
@@ -167,6 +174,13 @@ public final class CedarEngine implements AutoCloseable {
         Objects.requireNonNull(request, "request");
         Objects.requireNonNull(policySetId, "policySetId");
         Objects.requireNonNull(entities, "entities");
+        // The stateful call only takes a preparsed schema name; an inline schema cannot travel.
+        if (request.schema() != null && schemaId == null) {
+            throw new IllegalArgumentException(
+                    "isAuthorizedCached cannot use an inline schema; cache it with"
+                            + " cacheSchema(id, schema) and pass the id to"
+                            + " isAuthorizedCached(request, policySetId, schemaId, entities)");
+        }
         String json;
         try {
             ObjectNode root = mapper.valueToTree(request);
@@ -180,7 +194,7 @@ public final class CedarEngine implements AutoCloseable {
         } catch (JsonProcessingException e) {
             throw new CedarException("Failed to serialize cached authorization request", e);
         }
-        String result = wasm.statefulAuthorize(json);
+        String result = checkWasmError(wasm.statefulAuthorize(json));
         try {
             return mapper.readValue(result, AuthorizationResponse.class);
         } catch (JsonProcessingException e) {
@@ -191,6 +205,14 @@ public final class CedarEngine implements AutoCloseable {
     @Override
     public void close() {
         // Wasm memory is GC'd with the instance; contract established for future use
+    }
+
+    /** Some exports answer with a bare {@code ERROR:<message>} instead of the JSON envelope. */
+    private static String checkWasmError(String result) {
+        if (result.startsWith(WASM_ERROR_PREFIX)) {
+            throw new CedarException(result.substring(WASM_ERROR_PREFIX.length()));
+        }
+        return result;
     }
 
     private void serializeSchema(ObjectNode root, Schema schema) {

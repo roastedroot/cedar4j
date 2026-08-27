@@ -1,9 +1,11 @@
 package io.roastedroot.cedar4j;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public final class TemplateLink {
@@ -11,17 +13,21 @@ public final class TemplateLink {
     private final String resultPolicyId;
     private final List<LinkValue> linkValues;
 
-    @JsonCreator
-    private TemplateLink(
-            @JsonProperty("templateId") String templateId,
-            @JsonProperty("newId") String resultPolicyId,
-            @JsonProperty("values") List<LinkValue> linkValues) {
+    private TemplateLink(String templateId, String resultPolicyId, List<LinkValue> linkValues) {
         this.templateId = Objects.requireNonNull(templateId, "templateId");
         this.resultPolicyId = Objects.requireNonNull(resultPolicyId, "resultPolicyId");
         this.linkValues =
                 linkValues != null
                         ? Collections.unmodifiableList(linkValues)
                         : Collections.emptyList();
+        // The FFI keys by slot and rejects duplicate keys.
+        Map<String, EntityUID> seen = new LinkedHashMap<>();
+        for (LinkValue value : this.linkValues) {
+            if (seen.put(value.slot(), value.value()) != null) {
+                throw new IllegalArgumentException(
+                        "Duplicate slot in link values: " + value.slot());
+            }
+        }
     }
 
     public static TemplateLink of(
@@ -39,9 +45,19 @@ public final class TemplateLink {
         return resultPolicyId;
     }
 
-    @JsonProperty("values")
+    @JsonIgnore
     public List<LinkValue> linkValues() {
         return linkValues;
+    }
+
+    /** The FFI declares link values as a map from slot id to entity uid. */
+    @JsonProperty("values")
+    Map<String, EntityUID> serializedValues() {
+        Map<String, EntityUID> values = new LinkedHashMap<>();
+        for (LinkValue value : linkValues) {
+            values.put(value.slot(), value.value());
+        }
+        return values;
     }
 
     @Override
@@ -78,9 +94,7 @@ public final class TemplateLink {
         private final String slot;
         private final EntityUID value;
 
-        @JsonCreator
-        private LinkValue(
-                @JsonProperty("slot") String slot, @JsonProperty("value") EntityUID value) {
+        private LinkValue(String slot, EntityUID value) {
             this.slot = Objects.requireNonNull(slot, "slot");
             this.value = Objects.requireNonNull(value, "value");
         }
@@ -89,12 +103,10 @@ public final class TemplateLink {
             return new LinkValue(slot, value);
         }
 
-        @JsonProperty("slot")
         public String slot() {
             return slot;
         }
 
-        @JsonProperty("value")
         public EntityUID value() {
             return value;
         }
